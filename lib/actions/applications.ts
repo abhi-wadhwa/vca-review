@@ -81,68 +81,79 @@ export async function getApplicationById(id: number) {
 }
 
 export async function uploadApplications(data: unknown[]) {
-  const session = await auth();
-  if (!session?.user?.id || session.user.role !== 'admin') {
-    return { error: 'Unauthorized' };
-  }
-
-  const batchId = `batch_${Date.now()}`;
-  const results = {
-    success: 0,
-    duplicates: 0,
-    errors: [] as string[],
-  };
-
-  for (const row of data) {
-    const parsed = applicationCsvSchema.safeParse(row);
-    if (!parsed.success) {
-      results.errors.push(`Invalid row: ${JSON.stringify(row)}`);
-      continue;
+  try {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== 'admin') {
+      return { error: 'Unauthorized' };
     }
 
-    // Check for duplicate by email
-    const existing = await db.query.applications.findFirst({
-      where: eq(applications.email, parsed.data.email),
-    });
+    const batchId = `batch_${Date.now()}`;
+    const results = {
+      success: 0,
+      duplicates: 0,
+      errors: [] as string[],
+    };
 
-    if (existing) {
-      results.duplicates++;
-      continue;
+    for (const row of data) {
+      try {
+        const parsed = applicationCsvSchema.safeParse(row);
+        if (!parsed.success) {
+          results.errors.push(`Invalid row: ${JSON.stringify(row).substring(0, 100)}`);
+          continue;
+        }
+
+        // Check for duplicate by email
+        const existing = await db.query.applications.findFirst({
+          where: eq(applications.email, parsed.data.email),
+        });
+
+        if (existing) {
+          results.duplicates++;
+          continue;
+        }
+
+        await db.insert(applications).values({
+          timestamp: parsed.data.timestamp || null,
+          fullName: parsed.data.fullName,
+          email: parsed.data.email,
+          major: parsed.data.major || null,
+          classStanding: parsed.data.classStanding || null,
+          fridayAvailability: parsed.data.fridayAvailability || null,
+          resumeUrl: parsed.data.resumeUrl || null,
+          linkedinUrl: parsed.data.linkedinUrl || null,
+          question1Response: parsed.data.question1Response || null,
+          question2Response: parsed.data.question2Response || null,
+          question3Response: parsed.data.question3Response || null,
+          question4Response: parsed.data.question4Response || null,
+          question5Response: parsed.data.question5Response || null,
+          anythingElse: parsed.data.anythingElse || null,
+          batchId,
+        });
+
+        results.success++;
+      } catch (rowError) {
+        const message = rowError instanceof Error ? rowError.message : 'Unknown error';
+        results.errors.push(`Row error: ${message}`);
+      }
     }
 
-    await db.insert(applications).values({
-      timestamp: parsed.data.timestamp || null,
-      fullName: parsed.data.fullName,
-      email: parsed.data.email,
-      major: parsed.data.major || null,
-      classStanding: parsed.data.classStanding || null,
-      fridayAvailability: parsed.data.fridayAvailability || null,
-      resumeUrl: parsed.data.resumeUrl || null,
-      linkedinUrl: parsed.data.linkedinUrl || null,
-      question1Response: parsed.data.question1Response || null,
-      question2Response: parsed.data.question2Response || null,
-      question3Response: parsed.data.question3Response || null,
-      question4Response: parsed.data.question4Response || null,
-      question5Response: parsed.data.question5Response || null,
-      anythingElse: parsed.data.anythingElse || null,
+    await logAction('UPLOAD_APPLICATIONS', 'application', undefined, {
       batchId,
+      success: results.success,
+      duplicates: results.duplicates,
+      errors: results.errors.length,
     });
 
-    results.success++;
+    revalidatePath('/admin');
+    revalidatePath('/admin/upload');
+    revalidatePath('/review');
+
+    return results;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Upload error:', message);
+    return { error: `Upload failed: ${message}` };
   }
-
-  await logAction('UPLOAD_APPLICATIONS', 'application', undefined, {
-    batchId,
-    success: results.success,
-    duplicates: results.duplicates,
-    errors: results.errors.length,
-  });
-
-  revalidatePath('/admin');
-  revalidatePath('/admin/upload');
-  revalidatePath('/review');
-
-  return results;
 }
 
 export async function archiveApplication(id: number) {
