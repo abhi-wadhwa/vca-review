@@ -4,7 +4,7 @@ import { db, users, reviews } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { eq, sql, desc } from 'drizzle-orm';
 import { userSchema } from '@/lib/validations';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { generatePassword } from '@/lib/utils';
 import { logAction } from './audit';
