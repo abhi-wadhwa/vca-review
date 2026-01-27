@@ -82,7 +82,7 @@ export default async function ResultsPage() {
       )}
 
       {applications.length > 0 ? (
-        <ResultsTable applications={applications} showDiscrepancies={isAdmin} />
+        <ResultsTable applications={applications} showDiscrepancies={isAdmin} isAdmin={isAdmin} />
       ) : (
         <Card>
           <CardContent className="flex items-center justify-center py-12">

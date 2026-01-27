@@ -175,6 +175,28 @@ export async function archiveApplication(id: number) {
   return { success: true };
 }
 
+export async function deleteApplication(id: number) {
+  const session = await auth();
+  if (!session?.user?.id || session.user.role !== 'admin') {
+    return { error: 'Unauthorized' };
+  }
+
+  try {
+    await db.delete(applications).where(eq(applications.id, id));
+
+    await logAction('DELETE_APPLICATION', 'application', id);
+
+    revalidatePath('/admin');
+    revalidatePath('/results');
+    revalidatePath('/review');
+
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return { error: `Failed to delete application: ${message}` };
+  }
+}
+
 export async function getApplicationStats() {
   const session = await auth();
   if (!session?.user?.id) {

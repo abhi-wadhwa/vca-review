@@ -18,9 +18,11 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Application, Review, User } from '@/lib/db/schema';
-import { ArrowUpDown, Download, AlertTriangle } from 'lucide-react';
+import { ArrowUpDown, Download, AlertTriangle, Trash2 } from 'lucide-react';
 import { cn, getPercentileColor, calculatePercentile } from '@/lib/utils';
 import { exportResultsToCsv } from '@/lib/actions/export';
+import { deleteApplication } from '@/lib/actions/applications';
+import { ConfirmationModal } from '@/components/confirmation-modal';
 
 type ApplicationWithReviews = Application & {
   reviews: (Review & { reviewer: User })[];
@@ -29,15 +31,19 @@ type ApplicationWithReviews = Application & {
 interface ResultsTableProps {
   applications: ApplicationWithReviews[];
   showDiscrepancies?: boolean;
+  isAdmin?: boolean;
 }
 
 type SortKey = 'name' | 'avgScore' | 'reviewCount';
 type SortDirection = 'asc' | 'desc';
 
-export function ResultsTable({ applications, showDiscrepancies = true }: ResultsTableProps) {
+export function ResultsTable({ applications, showDiscrepancies = true, isAdmin = false }: ResultsTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('avgScore');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [isExporting, setIsExporting] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const processedData = useMemo(() => {
     return applications.map((app) => {
@@ -135,6 +141,24 @@ export function ResultsTable({ applications, showDiscrepancies = true }: Results
     }
   };
 
+  const handleDeleteClick = (id: number) => {
+    setSelectedApplicationId(id);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedApplicationId) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteApplication(selectedApplicationId);
+      setDeleteModalOpen(false);
+      setSelectedApplicationId(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <TooltipProvider>
       <div className="space-y-4">
@@ -184,6 +208,7 @@ export function ResultsTable({ applications, showDiscrepancies = true }: Results
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
                 </TableHead>
+                {isAdmin && <TableHead className="text-center">Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -259,12 +284,34 @@ export function ResultsTable({ applications, showDiscrepancies = true }: Results
                         {app.reviews.length > 0 ? app.avgScore.toFixed(1) : '-'}
                       </span>
                     </TableCell>
+                    {isAdmin && (
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(app.id)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
         </div>
+
+        <ConfirmationModal
+          open={deleteModalOpen}
+          onOpenChange={setDeleteModalOpen}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Application"
+          description={`Are you sure you want to delete this application? This will permanently remove the application and all associated reviews. This action cannot be undone.`}
+          confirmText={isDeleting ? 'Deleting...' : 'Delete Application'}
+          isLoading={isDeleting}
+        />
       </div>
     </TooltipProvider>
   );
