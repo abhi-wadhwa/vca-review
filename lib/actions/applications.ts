@@ -197,6 +197,30 @@ export async function deleteApplication(id: number) {
   }
 }
 
+export async function deleteAllApplications() {
+  const session = await auth();
+  if (!session?.user?.id || session.user.role !== 'admin') {
+    return { error: 'Unauthorized' };
+  }
+
+  try {
+    await db.delete(applications);
+
+    await logAction('DELETE_ALL_APPLICATIONS', 'application', undefined, {
+      deletedBy: session.user.name || session.user.id,
+    });
+
+    revalidatePath('/admin');
+    revalidatePath('/results');
+    revalidatePath('/review');
+
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return { error: `Failed to delete all applications: ${message}` };
+  }
+}
+
 export async function getApplicationStats() {
   const session = await auth();
   if (!session?.user?.id) {

@@ -5,6 +5,7 @@ import { getAllApplicationsWithReviews } from '@/lib/actions/applications';
 import { ResultsTable } from '@/components/results-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle } from 'lucide-react';
+import { ClearAllButton } from '@/components/clear-all-button';
 
 export default async function ResultsPage() {
   let authSession = null;
@@ -39,11 +40,14 @@ export default async function ResultsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Results Dashboard</h1>
-        <p className="text-muted-foreground">
-          View and export applicant rankings based on reviewer scores.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Results Dashboard</h1>
+          <p className="text-muted-foreground">
+            View and export applicant rankings based on reviewer scores.
+          </p>
+        </div>
+        {isAdmin && applications.length > 0 && <ClearAllButton />}
       </div>
 
       {/* Stats cards */}

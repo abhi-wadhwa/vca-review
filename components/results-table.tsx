@@ -23,6 +23,7 @@ import { cn, getPercentileColor, calculatePercentile } from '@/lib/utils';
 import { exportResultsToCsv } from '@/lib/actions/export';
 import { deleteApplication } from '@/lib/actions/applications';
 import { ConfirmationModal } from '@/components/confirmation-modal';
+import { ApplicationReviewsModal } from '@/components/application-reviews-modal';
 
 type ApplicationWithReviews = Application & {
   reviews: (Review & { reviewer: User })[];
@@ -44,6 +45,8 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedApplicationName, setSelectedApplicationName] = useState('');
 
   const processedData = useMemo(() => {
     return applications.map((app) => {
@@ -159,6 +162,12 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
     }
   };
 
+  const handleViewReviews = (id: number, name: string) => {
+    setSelectedApplicationId(id);
+    setSelectedApplicationName(name);
+    setReviewModalOpen(true);
+  };
+
   return (
     <TooltipProvider>
       <div className="space-y-4">
@@ -230,7 +239,16 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{app.fullName}</span>
+                        {isAdmin && app.reviews.length > 0 ? (
+                          <button
+                            onClick={() => handleViewReviews(app.id, app.fullName)}
+                            className="font-medium hover:text-primary hover:underline text-left"
+                          >
+                            {app.fullName}
+                          </button>
+                        ) : (
+                          <span className="font-medium">{app.fullName}</span>
+                        )}
                         {app.hasDiscrepancy && showDiscrepancies && (
                           <Tooltip>
                             <TooltipTrigger>
@@ -311,6 +329,13 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
           description={`Are you sure you want to delete this application? This will permanently remove the application and all associated reviews. This action cannot be undone.`}
           confirmText={isDeleting ? 'Deleting...' : 'Delete Application'}
           isLoading={isDeleting}
+        />
+
+        <ApplicationReviewsModal
+          applicationId={selectedApplicationId}
+          applicationName={selectedApplicationName}
+          open={reviewModalOpen}
+          onOpenChange={setReviewModalOpen}
         />
       </div>
     </TooltipProvider>

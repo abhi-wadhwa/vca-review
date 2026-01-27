@@ -148,3 +148,44 @@ export async function getReviewsByApplication(applicationId: number) {
 
   return { reviews: applicationReviews };
 }
+
+export async function updateReview(reviewId: number, data: {
+  initiativeScore: number;
+  collaborationScore: number;
+  curiosityScore: number;
+  commitmentScore: number;
+  comments?: string;
+}) {
+  const session = await auth();
+  if (!session?.user?.id || session.user.role !== 'admin') {
+    return { error: 'Unauthorized' };
+  }
+
+  const totalScore = data.initiativeScore + data.collaborationScore + data.curiosityScore + data.commitmentScore;
+
+  try {
+    await db
+      .update(reviews)
+      .set({
+        initiativeScore: data.initiativeScore,
+        collaborationScore: data.collaborationScore,
+        curiosityScore: data.curiosityScore,
+        commitmentScore: data.commitmentScore,
+        totalScore,
+        comments: data.comments || null,
+      })
+      .where(eq(reviews.id, reviewId));
+
+    await logAction('UPDATE_REVIEW', 'review', reviewId, {
+      totalScore,
+    });
+
+    revalidatePath('/results');
+    revalidatePath('/admin');
+
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return { error: `Failed to update review: ${message}` };
+  }
+}
