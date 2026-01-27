@@ -42,7 +42,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { createUser, updateUser, deleteUser, resetUserPassword } from '@/lib/actions/users';
 import { formatDate } from '@/lib/utils';
-import { Plus, Edit, Trash2, Key, Loader2, Copy, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, Key, Loader2, Copy, Check, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface UserData {
   id: number;
@@ -67,6 +68,7 @@ export function UserManagement({ users: initialUsers }: UserManagementProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     username: '',
@@ -77,17 +79,30 @@ export function UserManagement({ users: initialUsers }: UserManagementProps) {
 
   const handleCreate = async () => {
     setIsLoading(true);
-    const result = await createUser(formData);
+    setError(null);
 
-    if ('success' in result) {
-      if (result.generatedPassword) {
-        setGeneratedPassword(result.generatedPassword);
-      } else {
-        setIsCreateOpen(false);
-        window.location.reload();
+    try {
+      const result = await createUser(formData);
+
+      if ('error' in result) {
+        setError(result.error as string);
+        setIsLoading(false);
+        return;
       }
+
+      if ('success' in result) {
+        if (result.generatedPassword) {
+          setGeneratedPassword(result.generatedPassword);
+        } else {
+          setIsCreateOpen(false);
+          window.location.reload();
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleEdit = async () => {
@@ -141,11 +156,18 @@ export function UserManagement({ users: initialUsers }: UserManagementProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <Dialog open={isCreateOpen} onOpenChange={(open) => {
+          setIsCreateOpen(open);
+          if (!open) {
+            setError(null);
+            setGeneratedPassword(null);
+          }
+        }}>
           <DialogTrigger asChild>
             <Button onClick={() => {
               setFormData({ username: '', email: '', password: '', role: 'reviewer' });
               setGeneratedPassword(null);
+              setError(null);
             }}>
               <Plus className="mr-2 h-4 w-4" />
               Add User
@@ -181,6 +203,12 @@ export function UserManagement({ users: initialUsers }: UserManagementProps) {
               </div>
             ) : (
               <>
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="username">Username</Label>
