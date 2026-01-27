@@ -7,10 +7,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertCircle } from 'lucide-react';
 
 export default async function ResultsPage() {
-  const session = await auth();
-  const isAdmin = session?.user?.role === 'admin';
+  let authSession = null;
+  let isAdmin = false;
+  let result: Awaited<ReturnType<typeof getAllApplicationsWithReviews>>;
 
-  const result = await getAllApplicationsWithReviews();
+  try {
+    authSession = await auth();
+    isAdmin = authSession?.user?.role === 'admin';
+    result = await getAllApplicationsWithReviews();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown server error';
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <p className="text-destructive">
+          Failed to load results. {message}
+        </p>
+      </div>
+    );
+  }
 
   if ('error' in result) {
     return (

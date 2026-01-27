@@ -1,40 +1,49 @@
-import { neon } from '@neondatabase/serverless';
-import * as dotenv from 'dotenv';
+import { sql as vercelSql } from '@vercel/postgres';
 import * as fs from 'fs';
 
-dotenv.config();
-
 async function runMigration() {
-  const DATABASE_URL = process.env.DATABASE_URL;
+  // Read .env file manually
+  const envContent = fs.readFileSync('.env', 'utf-8');
+  const DATABASE_URL = envContent
+    .split('\n')
+    .find(line => line.startsWith('DATABASE_URL='))
+    ?.split('=')[1]
+    .trim();
 
   if (!DATABASE_URL) {
-    console.error('DATABASE_URL not found in environment');
+    console.error('DATABASE_URL not found in .env');
     process.exit(1);
   }
 
-  const sql = neon(DATABASE_URL);
+  process.env.POSTGRES_URL = DATABASE_URL;
+
   const migrationSQL = fs.readFileSync('migrate-schema.sql', 'utf-8');
 
   console.log('Running migration...');
   console.log(migrationSQL);
+  console.log('');
 
   // Split by semicolons and execute each statement
   const statements = migrationSQL
     .split(';')
     .map(s => s.trim())
-    .filter(s => s.length > 0);
+    .filter(s => s.length > 0 && !s.startsWith('--'));
 
   for (const statement of statements) {
-    console.log(`Executing: ${statement.substring(0, 50)}...`);
+    console.log(`Executing: ${statement.substring(0, 60)}...`);
     try {
-      await sql(statement);
+      await vercelSql.query(statement);
       console.log('✓ Success');
-    } catch (error) {
-      console.error('✗ Error:', error);
+    } catch (error: any) {
+      console.error('✗ Error:', error.message);
     }
   }
 
-  console.log('Migration complete!');
+  console.log('\nMigration complete!');
+  process.exit(0);
 }
 
-runMigration().catch(console.error);
+runMigration().catch((error) => {
+  console.error('Fatal error:', error);
+  process.exit(1);
+});
