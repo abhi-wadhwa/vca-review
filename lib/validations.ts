@@ -8,7 +8,10 @@ export const loginSchema = z.object({
 export const userSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters').max(50),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
-  password: z.string().min(8, 'Password must be at least 8 characters').optional(),
+  password: z.string().optional().refine(
+    (val) => !val || val.length === 0 || val.length >= 8,
+    'Password must be at least 8 characters'
+  ),
   role: z.enum(['admin', 'reviewer']).default('reviewer'),
   isActive: z.boolean().default(true),
 });

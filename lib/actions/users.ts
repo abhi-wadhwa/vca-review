@@ -52,7 +52,9 @@ export async function createUser(data: unknown) {
 
   const parsed = userSchema.safeParse(data);
   if (!parsed.success) {
-    return { error: 'Invalid data', details: parsed.error.issues };
+    const firstError = parsed.error.issues[0];
+    const errorMessage = firstError?.message || 'Invalid data';
+    return { error: errorMessage, details: parsed.error.issues };
   }
 
   // Check for existing username
