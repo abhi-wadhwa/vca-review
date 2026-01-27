@@ -32,17 +32,20 @@ export const draftReviewSchema = z.object({
 });
 
 export const applicationCsvSchema = z.object({
+  timestamp: z.string().optional(),
   fullName: z.string().min(1, 'Full name is required'),
-  email: z.string().email('Invalid email'),
-  phoneNumber: z.string().optional(),
-  university: z.string().optional(),
+  email: z.string().min(1, 'Email is required'),
   major: z.string().optional(),
-  graduationYear: z.coerce.number().int().min(2000).max(2100).optional(),
-  linkedinUrl: z.string().url().optional().or(z.literal('')),
-  resumeUrl: z.string().url().optional().or(z.literal('')),
+  classStanding: z.string().optional(),
+  fridayAvailability: z.string().optional(),
+  resumeUrl: z.string().optional(),
+  linkedinUrl: z.string().optional(),
   question1Response: z.string().optional(),
   question2Response: z.string().optional(),
   question3Response: z.string().optional(),
+  question4Response: z.string().optional(),
+  question5Response: z.string().optional(),
+  anythingElse: z.string().optional(),
 });
 
 export const forgotPasswordSchema = z.object({

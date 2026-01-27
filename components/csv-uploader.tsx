@@ -15,43 +15,30 @@ interface UploadResult {
   errors: string[];
 }
 
-// Column mapping for flexible CSV headers
+// Column mapping for Google Form CSV headers
 const columnMappings: Record<string, string> = {
+  'timestamp': 'timestamp',
+  'name': 'fullName',
   'full_name': 'fullName',
   'fullname': 'fullName',
-  'name': 'fullName',
-  'applicant_name': 'fullName',
+  'usc_email': 'email',
   'email': 'email',
   'email_address': 'email',
-  'phone': 'phoneNumber',
-  'phone_number': 'phoneNumber',
-  'phonenumber': 'phoneNumber',
-  'university': 'university',
-  'school': 'university',
-  'college': 'university',
+  'major/minor': 'major',
   'major': 'major',
-  'field_of_study': 'major',
-  'graduation_year': 'graduationYear',
-  'graduationyear': 'graduationYear',
-  'grad_year': 'graduationYear',
-  'linkedin': 'linkedinUrl',
-  'linkedin_url': 'linkedinUrl',
-  'linkedinurl': 'linkedinUrl',
+  'class_standing': 'classStanding',
+  'are_you_free_@_11am-12pm_on_fridays_for_our_cohort_curriculum_meetings?': 'fridayAvailability',
   'resume': 'resumeUrl',
   'resume_url': 'resumeUrl',
-  'resumeurl': 'resumeUrl',
-  'question_1': 'question1Response',
-  'question1': 'question1Response',
-  'question1_response': 'question1Response',
-  'q1': 'question1Response',
-  'question_2': 'question2Response',
-  'question2': 'question2Response',
-  'question2_response': 'question2Response',
-  'q2': 'question2Response',
-  'question_3': 'question3Response',
-  'question3': 'question3Response',
-  'question3_response': 'question3Response',
-  'q3': 'question3Response',
+  'linkedin_(optional)': 'linkedinUrl',
+  'linkedin': 'linkedinUrl',
+  'linkedin_url': 'linkedinUrl',
+  'based_on_your_long-term_goals,_where_does_vca_fit_in_your_path,_and_what_are_you_hoping_to_get_out_of_joining_this_organization?_(250_words_max)': 'question1Response',
+  'tell_us_about_a_company_or_product_you_find_fascinating._if_you_had_to_explain_to_an_investor_why_it_might_succeed_or_fail,_what_would_you_focus_on?_(150_words_max)': 'question2Response',
+  'describe_a_situation_where_you_had_to_work_with_someone_who_strongly_disagreed_with_you._how_did_you_handle_the_situation,_and_what_steps_did_you_take_to_keep_the_work_moving_forward?_(150_words_max)': 'question3Response',
+  'if_you_could_have_dinner_with_one_founder,_who_would_you_choose?_what_specifically_would_you_want_to_learn_from_them,_and_how_would_that_insight_shape_the_way_you_build,_lead,_or_make_decisions?_(100-150_words)': 'question4Response',
+  'if_you_could_get_an_honest_answer_to_one_question_from_any_founder,_what_would_you_ask_and_why?_(50_words_max)': 'question5Response',
+  'anything_else_you_want_like_us_to_know?': 'anythingElse',
 };
 
 function normalizeColumnName(name: string): string {
@@ -200,7 +187,8 @@ export function CsvUploader() {
                   <tr className="border-b">
                     <th className="text-left p-2">Name</th>
                     <th className="text-left p-2">Email</th>
-                    <th className="text-left p-2">University</th>
+                    <th className="text-left p-2">Major</th>
+                    <th className="text-left p-2">Class</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -208,7 +196,8 @@ export function CsvUploader() {
                     <tr key={i} className="border-b">
                       <td className="p-2">{row.fullName}</td>
                       <td className="p-2">{row.email}</td>
-                      <td className="p-2">{row.university}</td>
+                      <td className="p-2">{row.major}</td>
+                      <td className="p-2">{row.classStanding}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -44,33 +44,14 @@ export default async function UploadPage() {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <h4 className="font-medium text-sm mb-2">Required Columns</h4>
+                <h4 className="font-medium text-sm mb-2">Expected Format</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Upload the Google Form CSV export directly. The first row should be headers. Columns are automatically mapped.
+                </p>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li><code className="bg-muted px-1 rounded">fullName</code> or <code className="bg-muted px-1 rounded">full_name</code> - Applicant&apos;s full name</li>
-                  <li><code className="bg-muted px-1 rounded">email</code> - Email address (used for duplicate detection)</li>
+                  <li><strong>Required:</strong> Name, USC Email</li>
+                  <li><strong>Optional:</strong> Timestamp, Major/Minor, Class Standing, Friday Availability, Resume, LinkedIn, 5 Essay Questions, Anything Else</li>
                 </ul>
-              </div>
-
-              <div>
-                <h4 className="font-medium text-sm mb-2">Optional Columns</h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li><code className="bg-muted px-1 rounded">phoneNumber</code> or <code className="bg-muted px-1 rounded">phone</code></li>
-                  <li><code className="bg-muted px-1 rounded">university</code> or <code className="bg-muted px-1 rounded">school</code></li>
-                  <li><code className="bg-muted px-1 rounded">major</code></li>
-                  <li><code className="bg-muted px-1 rounded">graduationYear</code> or <code className="bg-muted px-1 rounded">graduation_year</code></li>
-                  <li><code className="bg-muted px-1 rounded">linkedinUrl</code> or <code className="bg-muted px-1 rounded">linkedin</code></li>
-                  <li><code className="bg-muted px-1 rounded">resumeUrl</code> or <code className="bg-muted px-1 rounded">resume</code></li>
-                  <li><code className="bg-muted px-1 rounded">question1</code>, <code className="bg-muted px-1 rounded">question2</code>, <code className="bg-muted px-1 rounded">question3</code></li>
-                </ul>
-              </div>
-
-              <div className="bg-muted p-3 rounded-md">
-                <h4 className="font-medium text-sm mb-2">Example CSV</h4>
-                <pre className="text-xs overflow-x-auto">
-{`fullName,email,university,major,graduationYear
-John Doe,john@example.com,MIT,Computer Science,2025
-Jane Smith,jane@example.com,Stanford,Data Science,2024`}
-                </pre>
               </div>
 
               <div className="text-sm text-muted-foreground">

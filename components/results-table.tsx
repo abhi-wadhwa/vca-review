@@ -218,7 +218,7 @@ export function ResultsTable({ applications, showDiscrepancies = true }: Results
                         )}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {app.university}
+                        {app.major}
                       </div>
                     </TableCell>
                     <TableCell className="text-center">

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Application } from '@/lib/db/schema';
-import { ExternalLink, GraduationCap, Mail, Phone, Linkedin, FileText } from 'lucide-react';
+import { ExternalLink, Mail, Linkedin, FileText } from 'lucide-react';
 
 interface ApplicationCardProps {
   application: Application;
@@ -17,17 +17,14 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
           <div>
             <CardTitle className="text-xl">{application.fullName}</CardTitle>
             <div className="flex flex-wrap gap-2 mt-2">
-              {application.university && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  <GraduationCap className="h-3 w-3" />
-                  {application.university}
-                </Badge>
-              )}
               {application.major && (
                 <Badge variant="outline">{application.major}</Badge>
               )}
-              {application.graduationYear && (
-                <Badge variant="outline">Class of {application.graduationYear}</Badge>
+              {application.classStanding && (
+                <Badge variant="secondary">{application.classStanding}</Badge>
+              )}
+              {application.fridayAvailability && (
+                <Badge variant="outline">Friday: {application.fridayAvailability}</Badge>
               )}
             </div>
           </div>
@@ -42,12 +39,6 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
               {application.email}
             </a>
           </div>
-          {application.phoneNumber && (
-            <div className="flex items-center gap-1">
-              <Phone className="h-4 w-4" />
-              <span>{application.phoneNumber}</span>
-            </div>
-          )}
           {application.linkedinUrl && (
             <a
               href={application.linkedinUrl}
@@ -78,7 +69,7 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
         {application.question1Response && (
           <div className="space-y-2">
             <h4 className="font-medium text-sm text-muted-foreground">
-              Question 1: Why do you want to join VCA?
+              Question 1: Where does VCA fit in your path, and what are you hoping to get out of joining?
             </h4>
             <p className="text-sm whitespace-pre-wrap bg-muted p-3 rounded-md">
               {application.question1Response}
@@ -89,7 +80,7 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
         {application.question2Response && (
           <div className="space-y-2">
             <h4 className="font-medium text-sm text-muted-foreground">
-              Question 2: Describe a project you&apos;re proud of
+              Question 2: Tell us about a company or product you find fascinating.
             </h4>
             <p className="text-sm whitespace-pre-wrap bg-muted p-3 rounded-md">
               {application.question2Response}
@@ -100,10 +91,43 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
         {application.question3Response && (
           <div className="space-y-2">
             <h4 className="font-medium text-sm text-muted-foreground">
-              Question 3: How do you handle challenges?
+              Question 3: Describe a situation where you worked with someone who strongly disagreed with you.
             </h4>
             <p className="text-sm whitespace-pre-wrap bg-muted p-3 rounded-md">
               {application.question3Response}
+            </p>
+          </div>
+        )}
+
+        {application.question4Response && (
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm text-muted-foreground">
+              Question 4: If you could have dinner with one founder, who would you choose?
+            </h4>
+            <p className="text-sm whitespace-pre-wrap bg-muted p-3 rounded-md">
+              {application.question4Response}
+            </p>
+          </div>
+        )}
+
+        {application.question5Response && (
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm text-muted-foreground">
+              Question 5: If you could get an honest answer to one question from any founder, what would you ask?
+            </h4>
+            <p className="text-sm whitespace-pre-wrap bg-muted p-3 rounded-md">
+              {application.question5Response}
+            </p>
+          </div>
+        )}
+
+        {application.anythingElse && (
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm text-muted-foreground">
+              Anything Else
+            </h4>
+            <p className="text-sm whitespace-pre-wrap bg-muted p-3 rounded-md">
+              {application.anythingElse}
             </p>
           </div>
         )}

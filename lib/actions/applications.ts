@@ -111,17 +111,20 @@ export async function uploadApplications(data: unknown[]) {
     }
 
     await db.insert(applications).values({
+      timestamp: parsed.data.timestamp || null,
       fullName: parsed.data.fullName,
       email: parsed.data.email,
-      phoneNumber: parsed.data.phoneNumber || null,
-      university: parsed.data.university || null,
       major: parsed.data.major || null,
-      graduationYear: parsed.data.graduationYear || null,
-      linkedinUrl: parsed.data.linkedinUrl || null,
+      classStanding: parsed.data.classStanding || null,
+      fridayAvailability: parsed.data.fridayAvailability || null,
       resumeUrl: parsed.data.resumeUrl || null,
+      linkedinUrl: parsed.data.linkedinUrl || null,
       question1Response: parsed.data.question1Response || null,
       question2Response: parsed.data.question2Response || null,
       question3Response: parsed.data.question3Response || null,
+      question4Response: parsed.data.question4Response || null,
+      question5Response: parsed.data.question5Response || null,
+      anythingElse: parsed.data.anythingElse || null,
       batchId,
     });
 
