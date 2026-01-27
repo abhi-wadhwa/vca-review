@@ -7,7 +7,7 @@ interface RatingSliderProps {
   label: string;
   description?: string;
   value: number | undefined;
-  onChange: (value: number) => void;
+  onChange: (value: number | undefined) => void;
 }
 
 const scoreLabels: Record<number, string> = {
@@ -53,7 +53,7 @@ export function RatingSlider({ label, description, value, onChange }: RatingSlid
           <button
             key={score}
             type="button"
-            onClick={() => onChange(score)}
+            onClick={() => onChange(value === score ? undefined : score)}
             onMouseEnter={() => setHoveredValue(score)}
             onMouseLeave={() => setHoveredValue(null)}
             className={cn(

@@ -88,7 +88,7 @@ export default function ReviewPage() {
     return () => clearTimeout(timeoutId);
   }, [reviewState, application]);
 
-  const handleScoreChange = (field: keyof ReviewState) => (value: number) => {
+  const handleScoreChange = (field: keyof ReviewState) => (value: number | undefined) => {
     setReviewState(prev => ({ ...prev, [field]: value }));
   };
 
