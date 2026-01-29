@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { getNextUnreviewedApplication, getApplicationStats } from '@/lib/actions/applications';
 import { saveDraft, submitReview, getReviewProgress } from '@/lib/actions/reviews';
+import { getMyAssignmentCount } from '@/lib/actions/assignments';
 import { Application } from '@/lib/db/schema';
 import { Loader2, CheckCircle, Send } from 'lucide-react';
 
@@ -29,7 +30,7 @@ export default function ReviewPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [startedAt, setStartedAt] = useState<string | null>(null);
-  const [progress, setProgress] = useState({ completed: 0, total: 0, pending: 0 });
+  const [progress, setProgress] = useState({ completed: 0, total: 0, pending: 0, assigned: 0, assignedRemaining: 0 });
 
   const loadNextApplication = useCallback(async () => {
     setIsLoading(true);
@@ -59,12 +60,17 @@ export default function ReviewPage() {
     // Load stats
     const stats = await getApplicationStats();
     if (!('error' in stats)) {
-      setProgress({ completed: stats.reviewed, total: stats.total, pending: stats.pending });
+      setProgress(p => ({ ...p, completed: stats.reviewed, total: stats.total, pending: stats.pending }));
     }
 
     const reviewProgress = await getReviewProgress();
     if (!('error' in reviewProgress)) {
       setProgress(p => ({ ...p, completed: reviewProgress.completed }));
+    }
+
+    const assignmentCount = await getMyAssignmentCount();
+    if (!('error' in assignmentCount)) {
+      setProgress(p => ({ ...p, assigned: assignmentCount.total, assignedRemaining: assignmentCount.remaining }));
     }
 
     setIsLoading(false);
@@ -163,8 +169,8 @@ export default function ReviewPage() {
     <div className="space-y-6">
       {/* Progress indicator */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Your reviews: {progress.completed}</span>
-        <span>Remaining applications: {progress.pending}</span>
+        <span>Your reviews: {progress.completed}{progress.assigned > 0 ? ` / ${progress.assigned} assigned` : ''}</span>
+        <span>Remaining: {progress.assigned > 0 ? progress.assignedRemaining : progress.pending}</span>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">

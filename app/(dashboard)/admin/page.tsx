@@ -105,6 +105,9 @@ export default async function AdminDashboardPage() {
           <Link href="/admin/upload">
             <Button>Upload Applications</Button>
           </Link>
+          <Link href="/admin/allocations">
+            <Button>Manage Allocations</Button>
+          </Link>
           <Link href="/admin/users">
             <Button variant="outline">Manage Users</Button>
           </Link>

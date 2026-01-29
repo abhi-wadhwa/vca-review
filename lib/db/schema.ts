@@ -25,6 +25,7 @@ export const users = pgTable('users', {
 export const usersRelations = relations(users, ({ many }) => ({
   reviews: many(reviews),
   draftReviews: many(draftReviews),
+  assignments: many(assignments),
   auditLogs: many(auditLogs),
 }));
 
@@ -52,6 +53,7 @@ export const applications = pgTable('applications', {
 export const applicationsRelations = relations(applications, ({ many }) => ({
   reviews: many(reviews),
   draftReviews: many(draftReviews),
+  assignments: many(assignments),
 }));
 
 export const reviews = pgTable('reviews', {
@@ -106,6 +108,26 @@ export const draftReviewsRelations = relations(draftReviews, ({ one }) => ({
   }),
 }));
 
+export const assignments = pgTable('assignments', {
+  id: serial('id').primaryKey(),
+  applicationId: integer('application_id').references(() => applications.id, { onDelete: 'cascade' }).notNull(),
+  reviewerId: integer('reviewer_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  assignedAt: timestamp('assigned_at').defaultNow(),
+}, (table) => ({
+  uniqueAssignment: unique().on(table.applicationId, table.reviewerId),
+}));
+
+export const assignmentsRelations = relations(assignments, ({ one }) => ({
+  application: one(applications, {
+    fields: [assignments.applicationId],
+    references: [applications.id],
+  }),
+  reviewer: one(users, {
+    fields: [assignments.reviewerId],
+    references: [users.id],
+  }),
+}));
+
 export const auditLogs = pgTable('audit_logs', {
   id: serial('id').primaryKey(),
   userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
@@ -131,5 +153,7 @@ export type Review = typeof reviews.$inferSelect;
 export type NewReview = typeof reviews.$inferInsert;
 export type DraftReview = typeof draftReviews.$inferSelect;
 export type NewDraftReview = typeof draftReviews.$inferInsert;
+export type Assignment = typeof assignments.$inferSelect;
+export type NewAssignment = typeof assignments.$inferInsert;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type NewAuditLog = typeof auditLogs.$inferInsert;

@@ -1,8 +1,8 @@
 'use server';
 
-import { db, applications, reviews, draftReviews } from '@/lib/db';
+import { db, applications, reviews, draftReviews, assignments } from '@/lib/db';
 import { auth } from '@/lib/auth';
-import { eq, and, notInArray, sql, desc } from 'drizzle-orm';
+import { eq, and, notInArray, inArray, sql, desc } from 'drizzle-orm';
 import { applicationCsvSchema } from '@/lib/validations';
 import { revalidatePath } from 'next/cache';
 import { logAction } from './audit';
@@ -44,7 +44,38 @@ export async function getNextUnreviewedApplication() {
     };
   }
 
-  // Get next unreviewed application
+  // Check if assignments exist
+  const myAssignments = await db.query.assignments.findMany({
+    where: eq(assignments.reviewerId, reviewerId),
+  });
+
+  const hasAssignments = myAssignments.length > 0;
+
+  if (hasAssignments) {
+    // Only show applications assigned to this reviewer
+    const assignedAppIds = myAssignments.map(a => a.applicationId);
+    const unreviewedAssignedIds = assignedAppIds.filter(id => !reviewedIdList.includes(id));
+
+    if (unreviewedAssignedIds.length === 0) {
+      return { completed: true };
+    }
+
+    const application = await db.query.applications.findFirst({
+      where: and(
+        inArray(applications.id, unreviewedAssignedIds),
+        eq(applications.isArchived, false)
+      ),
+      orderBy: [applications.uploadedAt],
+    });
+
+    if (!application) {
+      return { completed: true };
+    }
+
+    return { application };
+  }
+
+  // Fallback: no assignments exist yet, use original FCFS behavior
   const query = reviewedIdList.length > 0
     ? db.query.applications.findFirst({
         where: and(
