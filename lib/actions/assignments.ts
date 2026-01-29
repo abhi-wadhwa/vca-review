@@ -12,13 +12,13 @@ export async function allocateApplications() {
     return { error: 'Unauthorized' };
   }
 
-  // Get all active reviewers
+  // Get all active users (both reviewers and admins)
   const activeReviewers = await db.query.users.findMany({
-    where: and(eq(users.role, 'reviewer'), eq(users.isActive, true)),
+    where: eq(users.isActive, true),
   });
 
   if (activeReviewers.length < 2) {
-    return { error: 'Need at least 2 active reviewers to allocate applications' };
+    return { error: 'Need at least 2 active users to allocate applications' };
   }
 
   // Get all non-archived applications
@@ -146,9 +146,9 @@ export async function getAllocations() {
     });
   }
 
-  // Get active reviewers for the reassignment dropdown
+  // Get active users for the reassignment dropdown
   const activeReviewers = await db.query.users.findMany({
-    where: and(eq(users.role, 'reviewer'), eq(users.isActive, true)),
+    where: eq(users.isActive, true),
   });
 
   return {
