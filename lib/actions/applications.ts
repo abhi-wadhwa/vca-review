@@ -35,7 +35,6 @@ export async function getNextUnreviewedApplication() {
     return {
       application: draft.application,
       draft: {
-        initiativeScore: draft.initiativeScore,
         collaborationScore: draft.collaborationScore,
         curiosityScore: draft.curiosityScore,
         commitmentScore: draft.commitmentScore,

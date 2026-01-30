@@ -56,7 +56,6 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
         return {
           ...app,
           avgScore: 0,
-          avgInitiative: 0,
           avgCollaboration: 0,
           avgCuriosity: 0,
           avgCommitment: 0,
@@ -67,7 +66,6 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
 
       const scores = app.reviews.map((r) => r.totalScore);
       const avgScore = scores.reduce((a, b) => a + b, 0) / reviewCount;
-      const avgInitiative = app.reviews.reduce((sum, r) => sum + r.initiativeScore, 0) / reviewCount;
       const avgCollaboration = app.reviews.reduce((sum, r) => sum + r.collaborationScore, 0) / reviewCount;
       const avgCuriosity = app.reviews.reduce((sum, r) => sum + r.curiosityScore, 0) / reviewCount;
       const avgCommitment = app.reviews.reduce((sum, r) => sum + r.commitmentScore, 0) / reviewCount;
@@ -81,7 +79,6 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
       return {
         ...app,
         avgScore,
-        avgInitiative,
         avgCollaboration,
         avgCuriosity,
         avgCommitment,
@@ -203,7 +200,6 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
                 </TableHead>
-                <TableHead className="text-center">Initiative</TableHead>
                 <TableHead className="text-center">Collaboration</TableHead>
                 <TableHead className="text-center">Curiosity</TableHead>
                 <TableHead className="text-center">Commitment</TableHead>
@@ -247,7 +243,7 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
                             {app.fullName}
                           </button>
                         ) : (
-                          <span className="font-medium">{app.fullName}</span>
+                          <span className="font-medium">{isAdmin ? app.fullName : `Applicant #${app.id}`}</span>
                         )}
                         {app.hasDiscrepancy && showDiscrepancies && (
                           <Tooltip>
@@ -271,7 +267,7 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
                             {app.reviews.length}
                           </Badge>
                         </TooltipTrigger>
-                        {app.reviews.length > 0 && (
+                        {app.reviews.length > 0 && isAdmin && (
                           <TooltipContent>
                             <div className="space-y-1">
                               {app.reviews.map((r) => (
@@ -284,9 +280,6 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
                           </TooltipContent>
                         )}
                       </Tooltip>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {app.reviews.length > 0 ? app.avgInitiative.toFixed(1) : '-'}
                     </TableCell>
                     <TableCell className="text-center">
                       {app.reviews.length > 0 ? app.avgCollaboration.toFixed(1) : '-'}

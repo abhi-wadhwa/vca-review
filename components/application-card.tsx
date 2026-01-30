@@ -7,15 +7,18 @@ import { ExternalLink, Mail, Linkedin, FileText } from 'lucide-react';
 
 interface ApplicationCardProps {
   application: Application;
+  isAdmin?: boolean;
 }
 
-export function ApplicationCard({ application }: ApplicationCardProps) {
+export function ApplicationCard({ application, isAdmin = false }: ApplicationCardProps) {
+  const displayName = isAdmin ? application.fullName : `Applicant #${application.id}`;
+
   return (
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-xl">{application.fullName}</CardTitle>
+            <CardTitle className="text-xl">{displayName}</CardTitle>
             <div className="flex flex-wrap gap-2 mt-2">
               {application.major && (
                 <Badge variant="outline">{application.major}</Badge>
@@ -33,12 +36,14 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
       <CardContent className="space-y-6">
         {/* Contact Info */}
         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Mail className="h-4 w-4" />
-            <a href={`mailto:${application.email}`} className="hover:text-primary">
-              {application.email}
-            </a>
-          </div>
+          {isAdmin && (
+            <div className="flex items-center gap-1">
+              <Mail className="h-4 w-4" />
+              <a href={`mailto:${application.email}`} className="hover:text-primary">
+                {application.email}
+              </a>
+            </div>
+          )}
           {application.linkedinUrl && (
             <a
               href={application.linkedinUrl}

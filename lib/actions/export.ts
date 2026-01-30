@@ -41,7 +41,6 @@ export async function exportResultsToCsv() {
         major: app.major || '',
         classStanding: app.classStanding || '',
         reviewCount: 0,
-        avgInitiative: '',
         avgCollaboration: '',
         avgCuriosity: '',
         avgCommitment: '',
@@ -50,7 +49,6 @@ export async function exportResultsToCsv() {
       };
     }
 
-    const avgInitiative = app.reviews.reduce((sum, r) => sum + r.initiativeScore, 0) / reviewCount;
     const avgCollaboration = app.reviews.reduce((sum, r) => sum + r.collaborationScore, 0) / reviewCount;
     const avgCuriosity = app.reviews.reduce((sum, r) => sum + r.curiosityScore, 0) / reviewCount;
     const avgCommitment = app.reviews.reduce((sum, r) => sum + r.commitmentScore, 0) / reviewCount;
@@ -66,7 +64,6 @@ export async function exportResultsToCsv() {
       major: app.major || '',
       classStanding: app.classStanding || '',
       reviewCount,
-      avgInitiative: avgInitiative.toFixed(2),
       avgCollaboration: avgCollaboration.toFixed(2),
       avgCuriosity: avgCuriosity.toFixed(2),
       avgCommitment: avgCommitment.toFixed(2),
@@ -90,7 +87,6 @@ export async function exportResultsToCsv() {
     'Major',
     'Class Standing',
     'Review Count',
-    'Avg Initiative',
     'Avg Collaboration',
     'Avg Curiosity',
     'Avg Commitment',
@@ -105,7 +101,6 @@ export async function exportResultsToCsv() {
     `"${r.major}"`,
     `"${r.classStanding}"`,
     r.reviewCount,
-    r.avgInitiative,
     r.avgCollaboration,
     r.avgCuriosity,
     r.avgCommitment,

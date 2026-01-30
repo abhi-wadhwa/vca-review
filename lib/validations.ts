@@ -18,7 +18,6 @@ export const userSchema = z.object({
 
 export const reviewSchema = z.object({
   applicationId: z.number().int().positive(),
-  initiativeScore: z.number().int().min(1).max(4),
   collaborationScore: z.number().int().min(1).max(4),
   curiosityScore: z.number().int().min(1).max(4),
   commitmentScore: z.number().int().min(1).max(4),
@@ -27,7 +26,6 @@ export const reviewSchema = z.object({
 
 export const draftReviewSchema = z.object({
   applicationId: z.number().int().positive(),
-  initiativeScore: z.number().int().min(1).max(4).optional(),
   collaborationScore: z.number().int().min(1).max(4).optional(),
   curiosityScore: z.number().int().min(1).max(4).optional(),
   commitmentScore: z.number().int().min(1).max(4).optional(),

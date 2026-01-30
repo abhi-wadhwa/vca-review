@@ -15,7 +15,6 @@ import { Application } from '@/lib/db/schema';
 import { Loader2, CheckCircle, Send } from 'lucide-react';
 
 interface ReviewState {
-  initiativeScore?: number;
   collaborationScore?: number;
   curiosityScore?: number;
   commitmentScore?: number;
@@ -46,7 +45,6 @@ export default function ReviewPage() {
       // Load draft if exists
       if ('draft' in result && result.draft) {
         setReviewState({
-          initiativeScore: result.draft.initiativeScore ?? undefined,
           collaborationScore: result.draft.collaborationScore ?? undefined,
           curiosityScore: result.draft.curiosityScore ?? undefined,
           commitmentScore: result.draft.commitmentScore ?? undefined,
@@ -99,13 +97,11 @@ export default function ReviewPage() {
   };
 
   const isFormComplete =
-    reviewState.initiativeScore !== undefined &&
     reviewState.collaborationScore !== undefined &&
     reviewState.curiosityScore !== undefined &&
     reviewState.commitmentScore !== undefined;
 
   const totalScore =
-    (reviewState.initiativeScore || 0) +
     (reviewState.collaborationScore || 0) +
     (reviewState.curiosityScore || 0) +
     (reviewState.commitmentScore || 0);
@@ -117,7 +113,6 @@ export default function ReviewPage() {
     const result = await submitReview(
       {
         applicationId: application.id,
-        initiativeScore: reviewState.initiativeScore!,
         collaborationScore: reviewState.collaborationScore!,
         curiosityScore: reviewState.curiosityScore!,
         commitmentScore: reviewState.commitmentScore!,
@@ -186,18 +181,11 @@ export default function ReviewPage() {
               <CardTitle className="flex items-center justify-between">
                 <span>Your Review</span>
                 <span className="text-2xl font-bold text-primary">
-                  {isFormComplete ? totalScore : '--'} / 16
+                  {isFormComplete ? totalScore : '--'} / 12
                 </span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <RatingSlider
-                label="Initiative"
-                description="Self-starter, proactive, takes ownership"
-                value={reviewState.initiativeScore}
-                onChange={handleScoreChange('initiativeScore')}
-              />
-
               <RatingSlider
                 label="Collaboration"
                 description="Team player, communication skills, empathy"
@@ -253,7 +241,7 @@ export default function ReviewPage() {
         onOpenChange={setShowConfirmModal}
         onConfirm={handleSubmit}
         title="Submit Review"
-        description={`Are you sure you want to submit your review for ${application.fullName}? Total score: ${totalScore}/16. This action cannot be undone.`}
+        description={`Are you sure you want to submit your review for Applicant #${application.id}? Total score: ${totalScore}/12. This action cannot be undone.`}
         confirmText={isSubmitting ? 'Submitting...' : 'Submit Review'}
         isLoading={isSubmitting}
       />

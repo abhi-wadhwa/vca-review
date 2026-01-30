@@ -60,7 +60,7 @@ export async function submitReview(data: unknown, startedAt?: string) {
   }
 
   const reviewerId = parseInt(session.user.id);
-  const { applicationId, initiativeScore, collaborationScore, curiosityScore, commitmentScore, comments } = parsed.data;
+  const { applicationId, collaborationScore, curiosityScore, commitmentScore, comments } = parsed.data;
 
   // Check if already reviewed
   const existing = await db.query.reviews.findFirst({
@@ -74,12 +74,11 @@ export async function submitReview(data: unknown, startedAt?: string) {
     return { error: 'You have already reviewed this application' };
   }
 
-  const totalScore = initiativeScore + collaborationScore + curiosityScore + commitmentScore;
+  const totalScore = collaborationScore + curiosityScore + commitmentScore;
 
   await db.insert(reviews).values({
     applicationId,
     reviewerId,
-    initiativeScore,
     collaborationScore,
     curiosityScore,
     commitmentScore,
@@ -150,7 +149,6 @@ export async function getReviewsByApplication(applicationId: number) {
 }
 
 export async function updateReview(reviewId: number, data: {
-  initiativeScore: number;
   collaborationScore: number;
   curiosityScore: number;
   commitmentScore: number;
@@ -161,13 +159,12 @@ export async function updateReview(reviewId: number, data: {
     return { error: 'Unauthorized' };
   }
 
-  const totalScore = data.initiativeScore + data.collaborationScore + data.curiosityScore + data.commitmentScore;
+  const totalScore = data.collaborationScore + data.curiosityScore + data.commitmentScore;
 
   try {
     await db
       .update(reviews)
       .set({
-        initiativeScore: data.initiativeScore,
         collaborationScore: data.collaborationScore,
         curiosityScore: data.curiosityScore,
         commitmentScore: data.commitmentScore,

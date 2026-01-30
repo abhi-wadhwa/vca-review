@@ -36,13 +36,11 @@ export function ApplicationReviewsModal({
   const [isLoading, setIsLoading] = useState(false);
   const [editingReview, setEditingReview] = useState<number | null>(null);
   const [editData, setEditData] = useState<{
-    initiativeScore: number;
     collaborationScore: number;
     curiosityScore: number;
     commitmentScore: number;
     comments: string;
   }>({
-    initiativeScore: 1,
     collaborationScore: 1,
     curiosityScore: 1,
     commitmentScore: 1,
@@ -69,7 +67,6 @@ export function ApplicationReviewsModal({
   const handleEdit = (review: ReviewWithReviewer) => {
     setEditingReview(review.id);
     setEditData({
-      initiativeScore: review.initiativeScore,
       collaborationScore: review.collaborationScore,
       curiosityScore: review.curiosityScore,
       commitmentScore: review.commitmentScore,
@@ -84,7 +81,6 @@ export function ApplicationReviewsModal({
   };
 
   const totalScore =
-    editData.initiativeScore +
     editData.collaborationScore +
     editData.curiosityScore +
     editData.commitmentScore;
@@ -142,21 +138,6 @@ export function ApplicationReviewsModal({
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Initiative (1-4)</Label>
-                          <Input
-                            type="number"
-                            min="1"
-                            max="4"
-                            value={editData.initiativeScore}
-                            onChange={(e) =>
-                              setEditData({
-                                ...editData,
-                                initiativeScore: parseInt(e.target.value) || 1,
-                              })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
                           <Label>Collaboration (1-4)</Label>
                           <Input
                             type="number"
@@ -213,16 +194,12 @@ export function ApplicationReviewsModal({
                         />
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Total Score: <span className="font-bold">{totalScore}/16</span>
+                        Total Score: <span className="font-bold">{totalScore}/12</span>
                       </div>
                     </div>
                   ) : (
                     <div className="space-y-3">
                       <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Initiative:</span>{' '}
-                          <span className="font-medium">{review.initiativeScore}/4</span>
-                        </div>
                         <div>
                           <span className="text-muted-foreground">Collaboration:</span>{' '}
                           <span className="font-medium">{review.collaborationScore}/4</span>
@@ -238,7 +215,7 @@ export function ApplicationReviewsModal({
                       </div>
                       <div className="pt-2 border-t">
                         <span className="text-sm text-muted-foreground">Total Score:</span>{' '}
-                        <span className="font-bold text-lg">{review.totalScore}/16</span>
+                        <span className="font-bold text-lg">{review.totalScore}/12</span>
                       </div>
                       {review.comments && (
                         <div className="pt-2">
