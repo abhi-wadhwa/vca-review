@@ -18,9 +18,9 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Application, Review, User } from '@/lib/db/schema';
-import { ArrowUpDown, Download, AlertTriangle, Trash2 } from 'lucide-react';
+import { ArrowUpDown, Download, AlertTriangle, Trash2, FileDown } from 'lucide-react';
 import { cn, getPercentileColor, calculatePercentile } from '@/lib/utils';
-import { exportResultsToCsv } from '@/lib/actions/export';
+import { exportResultsToCsv, exportApplicantReport } from '@/lib/actions/export';
 import { deleteApplication } from '@/lib/actions/applications';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { ApplicationReviewsModal } from '@/components/application-reviews-modal';
@@ -165,6 +165,19 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
     setReviewModalOpen(true);
   };
 
+  const handleExportApplicant = async (id: number) => {
+    const result = await exportApplicantReport(id);
+    if ('report' in result && result.report) {
+      const blob = new Blob([result.report], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = result.fileName || `applicant_${id}_report.txt`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+  };
+
   return (
     <TooltipProvider>
       <div className="space-y-4">
@@ -297,14 +310,30 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
                     </TableCell>
                     {isAdmin && (
                       <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteClick(app.id)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center justify-center gap-1">
+                          {app.reviews.length > 0 && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleExportApplicant(app.id)}
+                                >
+                                  <FileDown className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Export report</TooltipContent>
+                            </Tooltip>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteClick(app.id)}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     )}
                   </TableRow>
