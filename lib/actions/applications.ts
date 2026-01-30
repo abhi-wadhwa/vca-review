@@ -2,7 +2,7 @@
 
 import { db, applications, reviews, draftReviews, assignments } from '@/lib/db';
 import { auth } from '@/lib/auth';
-import { eq, and, notInArray, inArray, sql, desc } from 'drizzle-orm';
+import { eq, and, inArray, sql, desc } from 'drizzle-orm';
 import { applicationCsvSchema } from '@/lib/validations';
 import { revalidatePath } from 'next/cache';
 import { logAction } from './audit';
@@ -23,9 +23,29 @@ export async function getNextUnreviewedApplication() {
 
   const reviewedIdList = reviewedIds.map(r => r.applicationId);
 
-  // Check for existing draft first
+  // Get assignments for this reviewer
+  const myAssignments = await db.query.assignments.findMany({
+    where: eq(assignments.reviewerId, reviewerId),
+  });
+
+  // If no assignments, reviewer has nothing to review
+  if (myAssignments.length === 0) {
+    return { completed: true };
+  }
+
+  const assignedAppIds = myAssignments.map(a => a.applicationId);
+  const unreviewedAssignedIds = assignedAppIds.filter(id => !reviewedIdList.includes(id));
+
+  if (unreviewedAssignedIds.length === 0) {
+    return { completed: true };
+  }
+
+  // Check for existing draft on an assigned application
   const draft = await db.query.draftReviews.findFirst({
-    where: eq(draftReviews.reviewerId, reviewerId),
+    where: and(
+      eq(draftReviews.reviewerId, reviewerId),
+      inArray(draftReviews.applicationId, unreviewedAssignedIds)
+    ),
     with: {
       application: true,
     },
@@ -43,52 +63,13 @@ export async function getNextUnreviewedApplication() {
     };
   }
 
-  // Check if assignments exist
-  const myAssignments = await db.query.assignments.findMany({
-    where: eq(assignments.reviewerId, reviewerId),
+  const application = await db.query.applications.findFirst({
+    where: and(
+      inArray(applications.id, unreviewedAssignedIds),
+      eq(applications.isArchived, false)
+    ),
+    orderBy: [applications.uploadedAt],
   });
-
-  const hasAssignments = myAssignments.length > 0;
-
-  if (hasAssignments) {
-    // Only show applications assigned to this reviewer
-    const assignedAppIds = myAssignments.map(a => a.applicationId);
-    const unreviewedAssignedIds = assignedAppIds.filter(id => !reviewedIdList.includes(id));
-
-    if (unreviewedAssignedIds.length === 0) {
-      return { completed: true };
-    }
-
-    const application = await db.query.applications.findFirst({
-      where: and(
-        inArray(applications.id, unreviewedAssignedIds),
-        eq(applications.isArchived, false)
-      ),
-      orderBy: [applications.uploadedAt],
-    });
-
-    if (!application) {
-      return { completed: true };
-    }
-
-    return { application };
-  }
-
-  // Fallback: no assignments exist yet, use original FCFS behavior
-  const query = reviewedIdList.length > 0
-    ? db.query.applications.findFirst({
-        where: and(
-          notInArray(applications.id, reviewedIdList),
-          eq(applications.isArchived, false)
-        ),
-        orderBy: [applications.uploadedAt],
-      })
-    : db.query.applications.findFirst({
-        where: eq(applications.isArchived, false),
-        orderBy: [applications.uploadedAt],
-      });
-
-  const application = await query;
 
   if (!application) {
     return { completed: true };
