@@ -248,7 +248,7 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {isAdmin && app.reviews.length > 0 ? (
+                        {isAdmin ? (
                           <button
                             onClick={() => handleViewReviews(app.id, app.fullName)}
                             className="font-medium hover:text-primary hover:underline text-left"
@@ -256,7 +256,7 @@ export function ResultsTable({ applications, showDiscrepancies = true, isAdmin =
                             {app.fullName}
                           </button>
                         ) : (
-                          <span className="font-medium">{isAdmin ? app.fullName : `Applicant #${app.id}`}</span>
+                          <span className="font-medium">{`Applicant #${app.id}`}</span>
                         )}
                         {app.hasDiscrepancy && showDiscrepancies && (
                           <Tooltip>

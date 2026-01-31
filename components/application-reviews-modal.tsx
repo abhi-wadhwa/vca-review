@@ -14,8 +14,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getReviewsByApplication, updateReview } from '@/lib/actions/reviews';
+import { getApplicationById } from '@/lib/actions/applications';
 import { Loader2, Save } from 'lucide-react';
-import { Review, User } from '@/lib/db/schema';
+import { Review, User, Application } from '@/lib/db/schema';
+import { ApplicationCard } from '@/components/application-card';
 
 interface ApplicationReviewsModalProps {
   applicationId: number | null;
@@ -33,6 +35,7 @@ export function ApplicationReviewsModal({
   onOpenChange,
 }: ApplicationReviewsModalProps) {
   const [reviews, setReviews] = useState<ReviewWithReviewer[]>([]);
+  const [application, setApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [editingReview, setEditingReview] = useState<number | null>(null);
   const [editData, setEditData] = useState<{
@@ -51,9 +54,15 @@ export function ApplicationReviewsModal({
     if (!applicationId) return;
 
     setIsLoading(true);
-    const result = await getReviewsByApplication(applicationId);
-    if ('reviews' in result && result.reviews) {
-      setReviews(result.reviews);
+    const [reviewsResult, appResult] = await Promise.all([
+      getReviewsByApplication(applicationId),
+      getApplicationById(applicationId),
+    ]);
+    if ('reviews' in reviewsResult && reviewsResult.reviews) {
+      setReviews(reviewsResult.reviews);
+    }
+    if ('application' in appResult && appResult.application) {
+      setApplication(appResult.application);
     }
     setIsLoading(false);
   }, [applicationId]);
@@ -99,13 +108,20 @@ export function ApplicationReviewsModal({
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-        ) : reviews.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
-            No reviews yet for this application.
-          </div>
         ) : (
-          <div className="space-y-4">
-            {reviews.map((review) => (
+          <div className="space-y-6">
+            {application && (
+              <ApplicationCard application={application} isAdmin />
+            )}
+
+            {reviews.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground">
+                No reviews yet for this application.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Reviews</h3>
+                {reviews.map((review) => (
               <Card key={review.id}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -230,6 +246,8 @@ export function ApplicationReviewsModal({
                 </CardContent>
               </Card>
             ))}
+              </div>
+            )}
           </div>
         )}
       </DialogContent>
